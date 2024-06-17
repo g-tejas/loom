@@ -2,19 +2,19 @@
 #include <concepts>
 #include <type_traits>
 
-template<typename, typename = std::void_t<>>
+template <typename, typename = std::void_t<>>
 struct has_next_pointer : std::false_type {};
 
-template<typename T>
+template <typename T>
 struct has_next_pointer<T, std::void_t<decltype(std::declval<T>().next)>> {
   static constexpr bool value = std::is_pointer_v<decltype(std::declval<T>().next)>;
 };
 
-template<typename T>
+template <typename T>
 concept HasNextPointer = has_next_pointer<T>::value;
 
 /// Intrusive Linked List implementation where the type must contain the `next` pointer
-template<typename T>
+template <typename T>
   requires HasNextPointer<T>
 class Fifo {
 private:
@@ -32,10 +32,12 @@ public:
     }
   }
 
-  /// TODO: Utilise the trick to copy multiple queue elements in one go where you virtual map the same queue twice
+  /// TODO: Utilise the trick to copy multiple queue elements in one go where you virtual
+  /// map the same queue twice
   bool push(T *elem) {
     // TODO: Replace this with the CHECK_EX macro
-    if (elem == nullptr || elem->next != nullptr) return false;
+    if (elem == nullptr || elem->next != nullptr)
+      return false;
     if (head == nullptr) {
       head = elem;
       tail = elem;
@@ -47,25 +49,21 @@ public:
   }
 
   T *pop() {
-    if (head == nullptr) return nullptr;
+    if (head == nullptr)
+      return nullptr;
     T *ret = head;
     this->head = head->next;
     ret->next = nullptr;
-    if (this->tail == ret) this->tail = nullptr;
+    if (this->tail == ret)
+      this->tail = nullptr;
     return ret;
   }
 
-  T *front() const {
-    return head;
-  }
+  T *front() const { return head; }
 
-  T *back() const {
-    return tail;
-  }
+  T *back() const { return tail; }
 
-  [[nodiscard]] bool empty() const {
-    return front() == nullptr;
-  }
+  [[nodiscard]] bool empty() const { return front() == nullptr; }
 
   void clear() {
     while (head) {
@@ -75,6 +73,7 @@ public:
     }
     tail = nullptr;
   }
+ 
   Fifo(const Fifo &) = delete;
   Fifo &operator=(const Fifo &) = delete;
 };

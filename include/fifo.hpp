@@ -73,7 +73,7 @@ public:
     }
     tail = nullptr;
   }
- 
+
   Fifo(const Fifo &) = delete;
   Fifo &operator=(const Fifo &) = delete;
 };

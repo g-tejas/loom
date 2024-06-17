@@ -11,11 +11,15 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Configure CMake
-        run: cmake -S . -B build
+      - name: Setup Ninja
+        uses: seanmiddleditch/gha-setup-ninja@v4
 
-      - name: Build
-        run: cmake --build build -j $(nproc)
+      - name: Configure and Build Project
+        uses: threeal/cmake-action@main
+        with:
+          generator: Ninja
+          c-compiler: clang
+          cxx-compiler: clang++
 
       - name: Run tests
         run: |

@@ -4,7 +4,6 @@ project(eventloop)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(CMAKE_GENERATOR "Ninja")
 
 add_subdirectory(external)
 
@@ -14,7 +13,7 @@ add_executable(${PROJECT_NAME} src/main.cpp)
 
 target_include_directories(${PROJECT_NAME} PUBLIC include)
 
-target_link_libraries(${PROJECT_NAME} PUBLIC external)
+target_link_libraries(${PROJECT_NAME} PUBLIC)
 
 # Tests
 add_subdirectory(tests)

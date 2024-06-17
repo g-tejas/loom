@@ -20,6 +20,7 @@ jobs:
           generator: Ninja
           c-compiler: clang
           cxx-compiler: clang++
+          options: -DBUILD_BINARY=OFF -DBUILD_TESTS=ON
 
       - name: Run tests
         run: |

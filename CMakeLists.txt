@@ -5,15 +5,19 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-add_subdirectory(external)
+# pass cmake configs to build tests or not by default
+option(BUILD_BINARY "Build binary" ON)
+option(BUILD_TESTS "Build tests" ON)
 
-include_directories(include)
+if (BUILD_BINARY)
+    message(STATUS "Building binary")
+    include_directories(include)
+    add_executable(${PROJECT_NAME} src/main.cpp)
+    target_include_directories(${PROJECT_NAME} PUBLIC include)
+    target_link_libraries(${PROJECT_NAME} PUBLIC)
+endif ()
 
-add_executable(${PROJECT_NAME} src/main.cpp)
-
-target_include_directories(${PROJECT_NAME} PUBLIC include)
-
-target_link_libraries(${PROJECT_NAME} PUBLIC)
-
-# Tests
-add_subdirectory(tests)
+if (BUILD_TESTS)
+    message(STATUS "Building tests")
+    add_subdirectory(tests)
+endif ()

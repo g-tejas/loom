@@ -2,8 +2,7 @@ name: clang-format Check
 
 on:
   push:
-    branches:
-      - master
+  pull_request:
 
 jobs:
   clang-format:

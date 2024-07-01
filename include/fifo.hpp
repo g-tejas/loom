@@ -1,3 +1,5 @@
+#pragma once
+
 #include <cassert>
 #include <concepts>
 #include <type_traits>
@@ -15,7 +17,7 @@ concept HasNextPointer = has_next_pointer<T>::value;
 
 /// Intrusive Linked List implementation where the type must contain the `next` pointer
 template <typename T>
-  requires HasNextPointer<T>
+requires HasNextPointer<T>
 class Fifo {
 private:
   T *head = nullptr;

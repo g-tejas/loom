@@ -5,6 +5,7 @@ AccessModifierOffset: -2
 AllowShortBlocksOnASingleLine: Never
 AllowShortCaseLabelsOnASingleLine: true
 AlwaysBreakTemplateDeclarations: Yes
+IndentRequiresClause: false
 ColumnLimit: 90
 IndentWidth: 2
 TabWidth: 2

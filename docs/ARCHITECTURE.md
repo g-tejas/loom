@@ -5,18 +5,33 @@ tasks as that would essentially become threading, and a whole suite of problems.
 In the case of CPU intensive tasks, a threaded based program would perform
 much better.
 
-We might have to use threaded workers for filesystem operations, if `io_uring` 
+We might have to use threaded workers for filesystem operations, if `io_uring`
 is not available. We can also use this to offload CPU intensive tasks. TODO: Perhaps,
 for us, the orderbook building can be offloaded? Does this mean we need a separate `submit` queue?
 
-
 ## eventloop interface
+
 ```cpp
 event_loop.write(fd, buffer, bytesToWrite, callback);
 char buffer[1024];
 event_loop.read(fd, &buffer, bytesToRead, callback);
 ```
-`kqueue` and `io_uring` themselves have a batch size. But if that is full, we 
+
+`kqueue` and `io_uring` themselves have a batch size. But if that is full, we
 move the stuff into the overflow queue.
 
-Overflow queue. 
+Overflow queue.
+
+## Design choices
+
+Callback vs Threaded workers?
+What's our problem?
+We will have a few file descriptors which are subscribed to some exchange for streaming orderbook data.
+We need to be able to read from the file descriptors and process them efficiently.
+Do we need state persistence across function calls? The function that processes the websocket messages can essentially
+be a state machine that is called every time a message is received. This function can be called from the event loop.
+
+The coroutine runs until it yields cause it waits for an event
+
+# Boost.Context
+

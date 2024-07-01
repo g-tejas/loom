@@ -9,12 +9,18 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 option(BUILD_BINARY "Build binary" ON)
 option(BUILD_TESTS "Build tests" ON)
 
+add_subdirectory(external)
+
+set(SOURCES
+        src/main.cpp
+        src/backends/kqueue.cpp)
+
 if (BUILD_BINARY)
     message(STATUS "Building binary")
     include_directories(include)
-    add_executable(${PROJECT_NAME} src/main.cpp)
+    add_executable(${PROJECT_NAME} ${SOURCES})
     target_include_directories(${PROJECT_NAME} PUBLIC include)
-    target_link_libraries(${PROJECT_NAME} PUBLIC)
+    target_link_libraries(${PROJECT_NAME} PUBLIC external)
 endif ()
 
 if (BUILD_TESTS)

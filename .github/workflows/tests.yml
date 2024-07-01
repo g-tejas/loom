@@ -12,6 +12,10 @@ jobs:
       - name: Setup Ninja
         uses: seanmiddleditch/gha-setup-ninja@v4
 
+      - name: Install dependencies
+        run: |
+          brew install boost
+
       - name: Configure and Build Project
         uses: threeal/cmake-action@main
         with:

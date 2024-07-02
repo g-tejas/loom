@@ -1,3 +1,5 @@
+#pragma once
+
 #include "quill/LogMacros.h"
 #include <format>
 #include <source_location>

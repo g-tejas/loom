@@ -13,7 +13,9 @@ add_subdirectory(external)
 
 set(SOURCES
         src/main.cpp
-        src/backends/kqueue.cpp)
+        src/thread.cpp
+        src/reactor.cpp
+        src/backends/darwin.cpp)
 
 if (BUILD_BINARY)
     message(STATUS "Building binary")

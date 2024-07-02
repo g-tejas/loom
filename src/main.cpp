@@ -1,122 +1,19 @@
 #include "fifo.hpp"
 #include "utils.hpp"
-#include <boost/context/detail/fcontext.hpp>
-#include <boost/context/protected_fixedsize_stack.hpp>
-#include <boost/context/stack_context.hpp>
-#include <cassert>
 #include <cstdio>
 #include <fcntl.h>
-#include <netinet/in.h>
-#include <sys/event.h>
-#include <sys/ioctl.h>
-#include <sys/socket.h>
-#include <sys/time.h>
-#include <sys/types.h>
-#include <thread>
-#include <unistd.h>
+
+#include "thread.hpp"
 
 // we check if macos
 #ifdef __APPLE__
 #define SOCK_NONBLOCK O_NONBLOCK
 #endif
 
-#define THREAD_STATUS_COMPLETE 0
-#define THREAD_STATUS_ERROR 1
-
 #define DEFAULT_STACK_SIZE 4096
 
 namespace flux {
-using namespace boost::context::detail;
-using namespace boost::context;
-using StackAllocator = protected_fixedsize_stack;
-using ThreadContext = fcontext_t;
-using ReturnContext = transfer_t;
 
-struct Event {
-  enum Type : uint8_t {
-    NA = 0,
-    SocketRead = 1,
-    SocketWriteable = 2, // this is not currently implemented or handled
-    SocketError = 3,
-    SocketHangup = 4
-  };
-  Type type;
-  int fd;
-};
-
-/// A stack-ful coroutine class. This is a base class and user needs to implement it
-/// and implement the virtual `run()` method.
-// TODO: Implement CRTP
-// TODO: Implement boost intrusive pointer
-// TODO: Implement pthread style creation instead of having to define an object
-class Thread {
-public:
-  explicit Thread(size_t _stack_size) : m_stack_size(_stack_size) {
-    protected_fixedsize_stack stack_allocator(m_stack_size);
-    m_stack = stack_allocator.allocate();
-  }
-  ~Thread() {
-    protected_fixedsize_stack stack_allocator(m_stack.size);
-    stack_allocator.deallocate(m_stack);
-  }
-
-  /// Called from within thread's context
-  /// Passes control back to the caller (e.g Reactor), and this thread will be resumed
-  /// when the events are ready.
-  auto wait() -> Event * {
-    m_return_context = jump_fcontext(m_return_context.fctx, this);
-    return reinterpret_cast<Event *>(m_return_context.data);
-  }
-
-  /// Resumes the thread with the given event. Returns true if resumable
-  auto resume(Event *event) -> bool {
-    m_return_context = jump_fcontext(m_thread_context, event);
-    return m_return_context.data != THREAD_STATUS_COMPLETE;
-  }
-
-  /// Where you place your business logic
-  virtual void run() = 0;
-
-  /// Allocates `stack_size` for thread stack and starts executing the `run()` method
-  void start(size_t stack_size) {
-    // We enter the coroutine from a static routine because method signature of a
-    // member function might be iffy, and we need to pass the `this` pointer.
-    m_thread_context = make_fcontext(m_stack.sp, m_stack.size, Thread::enter);
-
-    // Transfers control to this thread. The reason we pass `this` is that we want to
-    // set the m_return_context to the reactor's context.
-    jump_fcontext(m_thread_context, (void *)this);
-  }
-
-private:
-  /// Entry point from the coroutine context, has the function type void* (*)(void*)
-  static void enter(ReturnContext ctx) {
-    auto *thread = reinterpret_cast<Thread *>(ctx.data);
-
-    thread->m_return_context = ctx;
-
-    thread->run();
-
-    while (true) {
-      // Transfer control back to the caller and pass zero to indicate that we are done
-      thread->m_return_context = jump_fcontext(thread->m_return_context.fctx, 0);
-    }
-  }
-
-private:
-  /// Represents the thread's state. Contains hardware context, stack pointer, instruction
-  /// pointers, etc.
-  fcontext_t m_thread_context{};
-
-  /// Used for context switching. Flip flops between the reactor and the thread
-  ReturnContext m_return_context{};
-
-  /// Used for managing the stack of the thread
-  stack_context m_stack;
-
-  /// Size of the requested stack
-  size_t m_stack_size;
-};
 // I want the API to look like this somehow. Not a class that i have to inherit
 // and then write the logic in the run code. Need to see how can modify this to run a
 // function instead.

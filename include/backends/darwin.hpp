@@ -20,7 +20,9 @@ public:
 
   //! Runs the event loop for given time or until there are no subscriptions left,
   //! whichever comes first. Look at TigerBeetle's implementation
-  bool run_for_ns(uint64_t ns);
+  auto run_for_ns(uint64_t ns) const -> bool;
+
+  void set_timer(int timer_period);
 
 private:
   //! Manages the socket operations. Basically a switch statement

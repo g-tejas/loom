@@ -36,6 +36,7 @@ void Thread::enter(ReturnContext ctx) {
   auto *thread = reinterpret_cast<Thread *>(ctx.data);
 
   thread->m_return_context = ctx;
+  printf("Thread::enter\n");
 
   thread->run();
 
@@ -43,4 +44,22 @@ void Thread::enter(ReturnContext ctx) {
     // Transfer control back to the caller and pass zero to indicate that we are done
     thread->m_return_context = jump_fcontext(thread->m_return_context.fctx, 0);
   }
+}
+
+auto Thread::subscribe(int fd) -> bool {
+  auto it = std::find(m_fds.begin(), m_fds.end(), fd);
+  if (it != m_fds.end()) {
+    return false;
+  }
+  m_fds.push_back(fd);
+  return true;
+}
+
+auto Thread::unsubscribe(int fd) -> bool {
+  auto it = std::find(m_fds.begin(), m_fds.end(), fd);
+  if (it != m_fds.end()) {
+    m_fds.erase(it);
+    return true;
+  }
+  return false;
 }

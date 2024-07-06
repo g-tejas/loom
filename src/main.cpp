@@ -3,6 +3,7 @@
 #include <cstdio>
 #include <fcntl.h>
 
+#include "backends/darwin.hpp"
 #include "thread.hpp"
 
 // we check if macos
@@ -75,6 +76,8 @@ struct Worker : flux::Thread {
     while (count < 100) {
       count++;
       thing = (thing * 7 + count) / 8;
+      printf("count: %d\n", count);
+      this->wait();
     }
   }
 };
@@ -82,8 +85,17 @@ struct Worker : flux::Thread {
 int main() {
   // Create a new context and stack to execute foo. Pass the stack pointer to the end,
   // stack grows downwards for most architecture, from highest mem address -> lowest
-  Worker worker(DEFAULT_STACK_SIZE);
-  worker.run();
+  Worker worker(DEFAULT_STACK_SIZE); // need to heap allocate
+  worker.start(100);
+
+  flux::KqueueReactor reactor;
+  reactor.subscribe(100, &worker);
+  reactor.set_timer(5000);
+
+  while (reactor.active()) {
+    printf("Working\n");
+    reactor.work();
+  }
 
   flux::Event fake{flux::Event::Type::NA, 0};
 

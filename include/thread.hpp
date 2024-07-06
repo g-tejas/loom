@@ -5,6 +5,7 @@
 #include <boost/context/stack_context.hpp>
 
 #include <cstddef>
+#include <vector>
 
 #define THREAD_STATUS_COMPLETE 0
 #define THREAD_STATUS_ERROR 1
@@ -22,7 +23,8 @@ struct Event {
     SocketRead = 1,
     SocketWriteable = 2, // this is not currently implemented or handled
     SocketError = 3,
-    SocketHangup = 4
+    SocketHangup = 4,
+    Timer = 5,
   };
   Type type;
   int fd;
@@ -45,19 +47,27 @@ public:
   auto wait() -> Event *;
 
   //! Resumes the thread with the given event. Returns true if resumable
-  auto resume(Event *event) -> bool;
+  [[nodiscard]] auto resume(Event *event) -> bool;
 
   //! Where you place your business logic
   virtual void run() = 0;
 
-  //! Allocates `stack_size` for thread stack and starts executing the `run()` method
+  //! Starts executing the `run()` method
   void start(size_t stack_size);
+
+  //! Subscribe to a particular file descriptor
+  auto subscribe(int fd) -> bool;
+
+  //! Unsubscribe to a particular file descriptor
+  auto unsubscribe(int fd) -> bool;
+
+  //! List of fds that this thread is interested in
+  std::vector<int> m_fds;
 
 private:
   //! Entry point from the coroutine context, has the function type void* (*)(void*)
   static void enter(ReturnContext ctx);
 
-private:
   /// Represents the thread's state. Contains hardware context, stack pointer, instruction
   /// pointers, etc.
   fcontext_t m_thread_context{};

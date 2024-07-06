@@ -24,7 +24,7 @@ defer_t(Fx _fx) -> defer_t<::std::decay_t<Fx>>;
 
 #include <sstream>
 
-#define CHECK_EX(cond_expr, description)                                                 \
+#define FLUX_ASSERT(cond_expr, description)                                              \
   do {                                                                                   \
     if (!(cond_expr)) [[unlikely]] {                                                     \
       std::source_location loc = std::source_location::current();                        \
@@ -34,5 +34,6 @@ defer_t(Fx _fx) -> defer_t<::std::decay_t<Fx>>;
          << description << ", triggered by expression: \n"                               \
          << "\t" << loc.line() << "\t|\t ... " << #cond_expr << " ...\n";                \
       std::printf("%s", ss.str().c_str());                                               \
+      std::exit(EXIT_FAILURE);                                                           \
     }                                                                                    \
   } while (0)

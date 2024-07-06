@@ -12,8 +12,9 @@ and the underlying implementation of the asynchronous interface.
 
 - No runtime allocations
 - Intrusive pointers
-- Fast context switches
+- Fast context switches (powered by Boost.Context)
 - Multiple backends: `kqueue`, `epoll`, `io_uring` (all of these seem to be edge triggered)
+- Supports unix domain sockets
 
 ## Todo
 

@@ -1,8 +1,5 @@
-#include "fifo.hpp"
-#include "utils.hpp"
 #include <cstdio>
 #include <fcntl.h>
-#include <iostream>
 
 #include "tracy/Tracy.hpp"
 #include "tracy/TracyC.h"
@@ -12,7 +9,6 @@
 
 using namespace std;
 
-// we check if macos
 #ifdef __APPLE__
 #define SOCK_NONBLOCK O_NONBLOCK
 #endif

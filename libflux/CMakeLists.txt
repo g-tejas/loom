@@ -41,4 +41,4 @@ set(SOURCES
 # add the library
 add_library(${PROJECT_NAME} STATIC ${SOURCES})
 target_include_directories(${PROJECT_NAME} PUBLIC include ${Boost_INCLUDE_DIRS})
-target_link_libraries(${PROJECT_NAME} PUBLIC ${Boost_LIBRARIES} Tracy::TracyClient quill:quill)
+target_link_libraries(${PROJECT_NAME} PUBLIC ${Boost_LIBRARIES} Tracy::TracyClient quill::quill)

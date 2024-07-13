@@ -4,6 +4,9 @@
 #include <fcntl.h>
 #include <iostream>
 
+#include "tracy/Tracy.hpp"
+#include "tracy/TracyC.h"
+
 #include "backends/darwin.hpp"
 #include "thread.hpp"
 
@@ -36,6 +39,7 @@ struct Worker : flux::Thread {
       thing = (thing * 7 + count) / 8;
       printf("count: %d\n", count);
       this->wait();
+      FrameMark;
     }
   }
 };
@@ -49,33 +53,10 @@ int main() {
   flux::KqueueReactor reactor;
   reactor.set_timer(1010, 1500, &worker);
   //  reactor.subscribe(1010, &worker);
+  tracy::SetThreadName("hello");
 
   while (reactor.active()) {
     reactor.work();
+    FrameMark;
   }
-
-  return 0;
-
-  //  CHECK_EX(false, "This is a test");
-  //  exit(1);
-  //  kq = kqueue();
-  //  assert(kq != -1);
-  //
-  //  struct context obj = {};
-  //  obj.rhandler = [](struct context *obj) {
-  //    printf("Received socket READ event via kqueue\n");
-  //    int csock = accept(obj->sk, NULL, 0);
-  //    assert(csock != -1);
-  //    close(csock);
-  //  };
-  //
-  //  // creet and prepare a socket
-  //  obj.sk = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
-  //  assert(obj.sk != -1);
-  //  int val = 1;
-  //  setsockopt(obj.sk, SOL_SOCKET, SO_REUSEADDR, &val, 4);
-  //
-  //  struct sockaddr_in addr = {};
-  //  addr.sin_family = AF_INET;
-  //  addr.sin_port = ntohs(64000);
 }

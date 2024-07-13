@@ -10,6 +10,7 @@ KqueueReactor::KqueueReactor() : m_kqueue_fd{kqueue()}, m_timeout{nullptr} {
 KqueueReactor::~KqueueReactor() { close(m_kqueue_fd); }
 
 bool KqueueReactor::work() {
+  ZoneScoped;
   // TODO: 16 can be adjusted based on busy-ness of the event loop. Can even be dynamic
   std::array<struct kevent, 16> events{};
 
@@ -61,6 +62,7 @@ void KqueueReactor::set_timer(int id, int timer_period, Thread *thread) {
 }
 
 void KqueueReactor::handle_sock_op(int fd, Operation op) {
+  ZoneScoped;
   // #ifndef NDEBUG
   FLUX_ASSERT(m_kqueue_fd >= 0, "Kqueue file descriptor is invalid");
   // #endif

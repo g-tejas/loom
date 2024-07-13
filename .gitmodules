@@ -1,3 +1,3 @@
-[submodule "external/quill"]
-	path = external/quill
-	url = https://github.com/odygrd/quill
+[submodule "external/tracy"]
+	path = external/tracy
+	url = https://github.com/wolfpld/tracy

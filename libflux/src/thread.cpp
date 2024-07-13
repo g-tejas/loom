@@ -2,6 +2,8 @@
 
 using namespace flux;
 
+const char *flux_thread = "flux_thread";
+
 Thread::Thread(size_t _stack_size) {
   StackAllocator stack_allocator(_stack_size);
   m_stack = stack_allocator.allocate();
@@ -13,12 +15,13 @@ Thread::~Thread() {
 }
 
 auto Thread::wait() -> Event * {
+  TracyFiberLeave;
   m_return_context = jump_fcontext(m_return_context.fctx, this);
+  TracyFiberEnter(flux_thread);
   return reinterpret_cast<Event *>(m_return_context.data);
 }
 
 auto Thread::resume(Event *event) -> bool {
-  printf("in resume\n");
   m_return_context = jump_fcontext(m_return_context.fctx, (void *)event);
   return m_return_context.data != THREAD_STATUS_COMPLETE;
 }
@@ -37,7 +40,7 @@ void Thread::enter(ReturnContext ctx) {
   auto *thread = reinterpret_cast<Thread *>(ctx.data);
 
   thread->m_return_context = ctx;
-
+  TracyFiberEnter(flux_thread);
   thread->run();
 
   while (true) {

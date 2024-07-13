@@ -3,6 +3,7 @@
 #include <boost/context/detail/fcontext.hpp>
 #include <boost/context/protected_fixedsize_stack.hpp>
 #include <boost/context/stack_context.hpp>
+#include <tracy/Tracy.hpp>
 
 #include <cstddef>
 #include <vector>
@@ -41,7 +42,7 @@ public:
 
   ~Thread();
 
-  //! Called from within thread's context
+  //! Called from within thread's context.
   //! Passes control back to the caller (e.g Reactor), and this thread will be resumed
   //! when the events are ready.
   auto wait() -> Event *;
@@ -49,19 +50,19 @@ public:
   //! Resumes the thread with the given event. Returns true if resumable
   [[nodiscard]] auto resume(Event *event) -> bool;
 
-  //! Where you place your business logic
+  //! Where you place your business logic.
   virtual void run() = 0;
 
-  //! Starts executing the `run()` method
+  //! Starts executing the `run()` method.
   void start();
 
-  //! Subscribe to a particular file descriptor
+  //! Subscribe to a particular file descriptor.
   auto subscribe(int fd) -> bool;
 
-  //! Unsubscribe to a particular file descriptor
+  //! Unsubscribe to a particular file descriptor.
   auto unsubscribe(int fd) -> bool;
 
-  //! List of fds that this thread is interested in
+  //! List of fds that this thread is interested in.
   std::vector<int> m_fds;
 
 private:

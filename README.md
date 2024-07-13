@@ -41,4 +41,7 @@ https://webflow.com/made-in-webflow/website/Apple-Style-Grid Can make this as th
   and `kqueue`,
   we just make the edge triggered the default.
 
-## Desgi
+## Ideas
+
+- [ ] Inject tracy profiling before functions during build step using AST transformations
+- [ ] Use `eventfd` for shared mem OB?

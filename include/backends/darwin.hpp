@@ -22,7 +22,7 @@ public:
   //! whichever comes first. Look at TigerBeetle's implementation
   auto run_for_ns(uint64_t ns) const -> bool;
 
-  void set_timer(int timer_period);
+  void set_timer(int id, int timer_period, Thread *thread);
 
 private:
   //! Manages the socket operations. Basically a switch statement

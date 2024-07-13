@@ -2,9 +2,12 @@
 #include "utils.hpp"
 #include <cstdio>
 #include <fcntl.h>
+#include <iostream>
 
 #include "backends/darwin.hpp"
 #include "thread.hpp"
+
+using namespace std;
 
 // we check if macos
 #ifdef __APPLE__
@@ -23,51 +26,6 @@ void thread_create(void *(*fn)(void *), void *arg,
                    uint64_t stack_size = DEFAULT_STACK_SIZE);
 } /* namespace flux */
 
-// struct Completion {
-//   Completion *next;
-//   //  void (*callback)(IO *, Completion *);
-// };
-//
-// class IO {
-// private:
-//   Fifo<Completion> timeouts;
-//   Fifo<Completion> completed;
-//   Fifo<Completion> io_pending;
-//
-// public:
-//   IO(size_t entries, int flags) {}
-//
-//   ~IO() = default;
-//
-// public:
-//   // Pass all queued submissions to the kernel and peek for completions
-//   void tick() {}
-//
-//   // Pass all queued submissions to the kernel and run for `nanoseconds`
-//   void run_for_ns(uint64_t nanoseconds) {}
-//
-//   void flush(bool wait_for_completions) {}
-//
-// public:
-//   void accept() {}
-//
-//   void close() {}
-//
-//   void connect() {}
-//
-//   void read() {}
-//
-//   void recv() {}
-//
-//   void send() {}
-//
-//   void write() {}
-//   void timeout() {}
-//
-// private:
-//   void submit() {}
-// };
-
 struct Worker : flux::Thread {
   explicit Worker(size_t _stack_size) : Thread(_stack_size) {}
   void run() override {
@@ -81,28 +39,21 @@ struct Worker : flux::Thread {
     }
   }
 };
-
 int main() {
   // Create a new context and stack to execute foo. Pass the stack pointer to the end,
   // stack grows downwards for most architecture, from highest mem address -> lowest
   Worker worker(DEFAULT_STACK_SIZE); // need to heap allocate
-  worker.start(100);
+  worker.start();
+  flux::Event fake{flux::Event::Type::NA, 0};
 
   flux::KqueueReactor reactor;
-  reactor.subscribe(100, &worker);
-  reactor.set_timer(5000);
+  reactor.set_timer(1010, 1500, &worker);
+  //  reactor.subscribe(1010, &worker);
 
   while (reactor.active()) {
-    printf("Working\n");
     reactor.work();
   }
 
-  flux::Event fake{flux::Event::Type::NA, 0};
-
-  while (worker.resume(&fake)) {
-  }
-
-  printf("Done\n");
   return 0;
 
   //  CHECK_EX(false, "This is a test");

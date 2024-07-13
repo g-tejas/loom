@@ -53,7 +53,7 @@ public:
   virtual void run() = 0;
 
   //! Starts executing the `run()` method
-  void start(size_t stack_size);
+  void start();
 
   //! Subscribe to a particular file descriptor
   auto subscribe(int fd) -> bool;
@@ -77,9 +77,6 @@ private:
 
   /// Used for managing the stack of the thread
   stack_context m_stack;
-
-  /// Size of the requested stack
-  size_t m_stack_size;
 };
 
 } /* namespace flux */

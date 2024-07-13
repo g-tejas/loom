@@ -47,23 +47,16 @@ void Reactor::remove_thread(Thread *thread) {
 auto Reactor::active() const -> bool { return m_subcount > 0; }
 
 void Reactor::notify(Event event) {
-  printf("Reactor::notify(%d)\n", event.fd);
   std::vector<Thread *> cleanup;
-  printf("here\n");
   for (const auto thread : m_subs_by_fd[event.fd]) {
-    printf("here2\n");
     if (!thread->resume(&event)) {
       cleanup.push_back(thread);
     }
   }
 
-  printf("finished resuming\n");
-
   for (const auto thread : cleanup) {
     this->remove_thread(thread);
   }
-
-  printf("finished cleaning up\n");
 
   if (event.type == Event::Type::SocketHangup || event.type == Event::Type::SocketError) {
     this->remove_socket(event.fd);

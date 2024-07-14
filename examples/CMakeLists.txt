@@ -1,2 +1,2 @@
-add_executable(fiber fiber.cpp)
-target_link_libraries(fiber PRIVATE libflux)
+add_executable(fibers fibers.cpp)
+target_link_libraries(fibers PRIVATE libflux)

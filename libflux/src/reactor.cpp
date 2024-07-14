@@ -1,4 +1,4 @@
-#include "reactor.hpp"
+#include "flux/reactor.hpp"
 
 using namespace flux;
 

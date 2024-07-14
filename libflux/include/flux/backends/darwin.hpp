@@ -1,6 +1,6 @@
 #pragma once
 
-#include "reactor.hpp"
+#include "flux/reactor.hpp"
 #include <array>
 #include <sys/event.h>
 #include <sys/time.h>

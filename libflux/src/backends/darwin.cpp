@@ -1,5 +1,5 @@
-#include "backends/darwin.hpp"
-#include "utils.hpp"
+#include "flux/backends/darwin.hpp"
+#include "flux/utils.hpp"
 
 using namespace flux;
 
@@ -49,7 +49,12 @@ bool KqueueReactor::work() {
 auto KqueueReactor::run_for_ns(uint64_t ns) const -> bool { return true; }
 
 void KqueueReactor::set_timer(int id, int timer_period, Thread *thread) {
-  FLUX_ASSERT(m_kqueue_fd >= 0, "Kqueue file descriptor is invalid");
+  FLUX_ASSERT(
+      m_kqueue_fd >= 0,
+      "Kqueue file descriptor is invalid"); // this is a OS issue, not programmer. Asserts
+                                            // should assert programmer errors // this is
+                                            // a OS issue, not programmer. Asserts should
+                                            // assert programmer errors
   // Have to manually subscribe the worker to the timer
   m_subs_by_fd[id].push_back(thread);
   m_subcount++;

@@ -1,4 +1,4 @@
-#include "thread.hpp"
+#include "flux/thread.hpp"
 
 using namespace flux;
 
@@ -23,7 +23,7 @@ auto Thread::wait() -> Event * {
 
 auto Thread::resume(Event *event) -> bool {
   m_return_context = jump_fcontext(m_return_context.fctx, (void *)event);
-  return m_return_context.data != THREAD_STATUS_COMPLETE;
+  return m_return_context.data != FIBER_STATUS_COMPLETE;
 }
 
 void Thread::start() {
@@ -45,7 +45,8 @@ void Thread::enter(ReturnContext ctx) {
 
   while (true) {
     // Transfer control back to the caller and pass zero to indicate that we are done
-    thread->m_return_context = jump_fcontext(thread->m_return_context.fctx, 0);
+    thread->m_return_context =
+        jump_fcontext(thread->m_return_context.fctx, FIBER_STATUS_COMPLETE);
   }
 }
 

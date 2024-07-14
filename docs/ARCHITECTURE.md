@@ -22,6 +22,10 @@ https://agraphicsguynotes.com/posts/fiber_in_cpp_understanding_the_basics/
 
 ## Memory Management for Fibers
 
+- No runtime memory allocation.
+  Following [Tiger Style](https://github.com/tigerbeetle/tigerbeetle/blob/main/docs/TIGER_STYLE.md) no memory can be
+  freed and reallocated after initialisation. Avoid unpredictable behaviour and a system that is easier to reason about.
+  Also affects performance significantly.
 - The allocation of stacks is delayed until the scheduler (reactor) is ready to execute the fiber.
     - Can easily burn through a lot of memory especially if stacks are reused.
     - This delayed stack allocation enables reuse optimisation: keep a free-list of stacks, and reuse it for new fibers
@@ -29,7 +33,7 @@ https://agraphicsguynotes.com/posts/fiber_in_cpp_understanding_the_basics/
 - Not all fibers will require the same stack size. Can take inspiration from slab allocator design, keep a free-list for
   3-different stack sizes and allocate from that instead.
 
-## Pinning of hardware threads
+## M:1 Model & Pinning of hardware threads
 
 - We are the scheduler in this case. Don't want fibers to jump across cores, since we are scheduling them ourselves.
   Also incur cache penalties
@@ -39,8 +43,25 @@ https://agraphicsguynotes.com/posts/fiber_in_cpp_understanding_the_basics/
 - OS Specific
     - Windows: `SetThreadAffinityMask`
     - Linux: `pthread_setaffinity_np`
+- The event loop will be single threaded for now and pinned to a core. There are plans for work stealing, however.
 
 ## Overflow queue
 
 `kqueue` and `io_uring` themselves have a batch size. But if that is full, we
 move the stuff into the overflow queue.
+
+## Timers
+
+- The various IO readiness facilities all have different ways to schedule timers. `flux` aims to generalise this. There
+  are two options:
+    1. [Implement timers as a special lightweight fiber](https://photonlibos.github.io/docs/api/thread#timer) to
+       periodically fire notifications. Good if we want to call functions on timer fires. Function signature can look
+       like `Timer(uint64_t timeout, std::function<void*(void*)> on_timer, bool is_repeating = true, uint64_t stack_size = 1024)`
+    2. Use the kernel facilities to register timers.
+
+## Singleton Reactor
+
+- As mentioned earlier, `flux` is a M:1 model. This calls for
+  a [singleton pattern](https://photonlibos.github.io/docs/api/env), to ensure that the user doesn't accidentally
+  create > 1 reactor.
+- `void flux::init(flux::EventEngine event_engine = flux::EventEngine::AUTO);`

@@ -6,6 +6,13 @@
 using Thread = int;
 
 namespace flux {
+enum EventEngine {
+  AUTO = 1 << 0,
+  EPOLL = 1 << 1,
+  KQUEUE = 1 << 2,
+  IO_URING = 1 << 3,
+};
+
 //! Abstract base class for all Reactor backends [`epoll`, `kqueue`, `io_uring`]
 class Reactor {
 public:

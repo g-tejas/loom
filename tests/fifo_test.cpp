@@ -1,4 +1,4 @@
-#include "fifo.hpp"
+#include "flux/fifo.hpp"
 #include <catch2/catch_test_macros.hpp>
 
 struct Node {

@@ -11,11 +11,11 @@ option(BUILD_EXAMPLES "Build examples" ON)
 add_subdirectory(libflux)
 
 if (BUILD_EXAMPLES)
-    message(STATUS "Building examples")
+    message(STATUS "FLUX: Building examples")
     add_subdirectory(examples)
 endif ()
 
 if (BUILD_TESTS)
-    message(STATUS "Building tests")
+    message(STATUS "FLUX: Building tests")
     add_subdirectory(tests)
 endif ()

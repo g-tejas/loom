@@ -15,6 +15,7 @@ and the underlying implementation of the asynchronous interface.
 - Fast context switches (powered by Boost.Context)
 - Multiple backends: `kqueue`, `epoll`, `io_uring` (all of these seem to be edge triggered)
 - Supports unix domain sockets
+- Support for pinning event loop to hardware threads.
 
 ## Todo
 
@@ -33,7 +34,7 @@ https://webflow.com/made-in-webflow/website/Apple-Style-Grid Can make this as th
 ## Resources
 
 - [Tiger Style](https://github.com/tigerbeetle/tigerbeetle/blob/main/docs/TIGER_STYLE.md)
--
+- [⭐Fibers](https://graphitemaster.github.io/fibers/)
 
 *`kqueue`*: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/kqueue.2.html
 

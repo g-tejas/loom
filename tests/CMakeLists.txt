@@ -13,7 +13,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(Catch2)
 
 add_executable(${PROJECT_NAME} fifo_test.cpp)
-target_link_libraries(${PROJECT_NAME} Catch2::Catch2WithMain libflux)
+target_link_libraries(${PROJECT_NAME} Catch2::Catch2WithMain loom)
 
 # Register tests with CTest
 list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)

@@ -1,5 +1,8 @@
 # Reactor Backends
 
+[Super comprehensive blog](https://habr.com/en/articles/600123/) post on several event notification
+backends: `kqueue`,`epoll`, `IOCP`
+
 ## `kqueue` (Darwin)
 
 `KV_CLEAR`: Prevents kq from signalling the same event over and over again. If a socket wasn't read fully,
@@ -26,3 +29,20 @@ struct kevent {
 
 ## `epoll` (Older Linux distributions)
 
+# Boost.Context
+
+[Docs](https://live.boost.org/doc/libs/1_53_0/libs/context/doc/html/context/context.html#context.context.executing_a_context)
+
+- UB if a context function throws an exception. Wrap with `try-catch`
+- Calling `jump_fcontext` to the same context you are within results in undefined behaviour.
+- The size of the stack must be larger than `fcontext_t`
+
+There are POSIX apis for `makecontext`/`swapcontext`/`getcontext`. Perhaps we can wrap the Boost.Context fns around
+these. So that once time permits, we
+can [implement context switches with hand written asm](https://graphitemaster.github.io/fibers/). Boost.Context was
+written to be general and cross platform, so we could probably strip out a lot of the stuff to optimise.
+
+Use cases of Boost.Context in the wild
+
+- [Facebook's Folly](https://github.com/facebook/folly/blob/main/folly/fibers/Fiber.h) Actually really good, look at it
+  for fiber design. The entire fiber library is built around their `baton::post` and `baton::wait`

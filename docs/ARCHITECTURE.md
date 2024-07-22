@@ -9,6 +9,35 @@ be a state machine that is called every time a message is received. This functio
 
 The coroutine runs until it yields cause it waits for an event
 
+## Are stackful coroutines better than stack-less?
+
+C++ Coroutines are stackless, and many other popular coroutine libraries, for good reason. Stackful coroutines come with
+their own set of unique problems,
+
+1. Pre-allocated stack size for every fiber being run.
+   In stackless coroutines, the stack that the coroutine uses is the stack of its executor. And the only data being
+   stored is local variables that span at least one suspension point. This means that if a function call stack requires
+   500Kb of stack space, then every fiber stack needs to accommodate for call stacks of this size unlike stackless
+   coroutines.
+2. Thread local storage fuckery. Doesn't happen in stackless coroutines since the suspension points are known at compile
+   time and thread local access is well-defined. For stack-ful coroutines, however, can run into memory errors. For e.g,
+   suppose a function was inlined by the optimiser and writes to a cached TLS address and then gets migrated to another
+   OS thread, then it can corrupt the memory of the ex-thread.
+
+## Baton passing
+
+Like Folly, we can implement all of the fiber features on top of one synchronisation primitive, Batons.
+
+```cpp
+loom::baton b;
+b.wait();
+b.post();
+```
+
+The reactor will hold one side of the baton and the fiber itself holds the other. This way, fibers don't have to be used
+with a reactor at all. To pass the data, copying is ok. Since we are only passing event notifications which are a couple
+of bytes only.
+
 ## Cooperative multi tasking
 
 - The whole idea behind fibers is that instead of having time quantums, we trust that the tasks will yield within a

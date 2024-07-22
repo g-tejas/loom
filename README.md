@@ -1,4 +1,4 @@
-# eventloop
+# loom
 
 This abstraction serves the main purpose: To not think about IO readiness events, but just IO completion.
 What do I mean by this? The `io_uring` and `epoll` interface are quite different. `io_uring` takes the SQE,
@@ -19,9 +19,10 @@ and the underlying implementation of the asynchronous interface.
 
 ## Todo
 
-Need to decide whether we want a callback interface, or what.
-Normally, the callbacks are function pointers casted to integers, and stored in the user_data field of the SQE.
-Both kqueue and epoll have this. Once the IO is complete, the callback is invoked.
+- Rename to `loom` ? More appropriate than `flux` since this is a fiber library.
+  Need to decide whether we want a callback interface, or what.
+  Normally, the callbacks are function pointers casted to integers, and stored in the user_data field of the SQE.
+  Both kqueue and epoll have this. Once the IO is complete, the callback is invoked.
 
 https://webflow.com/made-in-webflow/website/Apple-Style-Grid Can make this as the front page LOL
 
@@ -35,6 +36,12 @@ https://webflow.com/made-in-webflow/website/Apple-Style-Grid Can make this as th
 
 - [Tiger Style](https://github.com/tigerbeetle/tigerbeetle/blob/main/docs/TIGER_STYLE.md)
 - [⭐Fibers](https://graphitemaster.github.io/fibers/)
+- [Old article about how to write high performance servers](https://web.archive.org/web/20060306033511/https://pl.atyp.us/content/tech/servers.html)
+  Talks about the four horsemen of poor performance. Read if necessary
+    - Context switches
+    - Data copies
+    - Lock contention
+    - Memoy allocation
 
 *`kqueue`*: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/kqueue.2.html
 

@@ -17,7 +17,7 @@ enum class Operation : uint8_t {
 
 //! The heart and soul of the loom library. Handles fiber dispatch
 class Loom {
-  public:
+public:
     Loom();
 
     ~Loom();
@@ -43,7 +43,7 @@ class Loom {
     //! whichever comes first. Look at TigerBeetle's implementation
     auto run_for_ns(uint64_t ns) const -> bool;
 
-  protected:
+protected:
     struct Subscription {
         int fd;
         Fiber *thread;
@@ -59,7 +59,7 @@ class Loom {
 
     void set_timer(int id, int timer_period);
 
-  private:
+private:
 #ifdef LOOM_BACKEND_KQUEUE
     int m_kqueue_fd;
     std::array<struct kevent, 16> m_event{};

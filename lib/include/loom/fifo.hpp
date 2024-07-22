@@ -19,11 +19,11 @@ concept HasNextPointer = has_next_pointer<T>::value;
 /// Intrusive Linked List implementation where the type must contain the `next` pointer
 template <HasNextPointer T>
 class fifo {
-  private:
+private:
     T *head = nullptr;
     T *tail = nullptr;
 
-  public:
+public:
     fifo() = default;
 
     ~fifo() {

@@ -29,7 +29,7 @@ using StackContext = ctx::stack_context;
 class Fiber {
     friend class Loom;
 
-  public:
+public:
     explicit Fiber(size_t _stack_size) {
         StackAllocator allocator(_stack_size);
         m_stack = allocator.allocate();
@@ -77,11 +77,11 @@ class Fiber {
         m_return_context = ctx::detail::jump_fcontext(m_thread_context, (void *)this);
     }
 
-  protected:
+protected:
     //! List of fds that this fiber is interested in.
     std::vector<int> m_fds;
 
-  private:
+private:
     //! Entry point from the coroutine context, has the function type void* (*)(void*)
     static void enter(ReturnContext ctx) {
         auto *thread = reinterpret_cast<Fiber *>(ctx.data);

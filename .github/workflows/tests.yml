@@ -16,13 +16,17 @@ jobs:
         run: |
           brew install boost
 
+      - name: Install latest clang
+        run: |
+          brew install llvm
+          clang --version
+
       - name: Configure and Build Project
         uses: threeal/cmake-action@main
         with:
           generator: Ninja
-          c-compiler: clang
-          cxx-compiler: clang++
-          options: -DBUILD_BINARY=OFF -DBUILD_TESTS=ON
+          c-compiler: /opt/homebrew/opt/llvm/bin/clang
+          cxx-compiler: /opt/homebrew/opt/llvm/bin/clang++
 
       - name: Run tests
         run: |

@@ -98,15 +98,12 @@ public:
                 continue;
             }
             if (events[i].filter == EVFILT_READ) {
-                printf("Read event\n");
                 this->notify(Event{.type = Event::Type::SocketRead,
                                    .fd = static_cast<int>(events[i].ident)});
             } else if (events[i].filter == EVFILT_WRITE) {
-                printf("Write event\n");
                 this->notify(Event{.type = Event::Type::SocketWriteable,
                                    .fd = static_cast<int>(events[i].ident)});
             } else if (events[i].filter == EVFILT_TIMER) {
-                printf("Timer event\n");
                 this->notify(Event{.type = Event::Type::Timer,
                                    .fd = static_cast<int>(events[i].ident)});
             }
@@ -116,7 +113,8 @@ public:
 
     void set_timer(int fd, int timer_period, Fiber *fiber) override {
         struct kevent ev {};
-        EV_SET(&ev, fd, EVFILT_TIMER, EV_ADD | EV_ENABLE, NOTE_SECONDS, 5, nullptr);
+        EV_SET(&ev, fd, EVFILT_TIMER, EV_ADD | EV_ENABLE, NOTE_SECONDS, timer_period,
+               nullptr);
         int n = kevent(m_kq_fd, &ev, 1, nullptr, 0, nullptr);
         FLUX_ASSERT(n >= 0, "Failed to set timer");
 

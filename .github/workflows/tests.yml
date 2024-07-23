@@ -25,9 +25,8 @@ jobs:
         uses: threeal/cmake-action@main
         with:
           generator: Ninja
-          c-compiler: clang
-          cxx-compiler: clang++
-          options: -G Ninja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_COMPILER=/opt/homebrew/opt/llvm/bin/clang -DCMAKE_CXX_COMPILER=/opt/homebrew/opt/llvm/bin/clang++
+          c-compiler: /opt/homebrew/opt/llvm/bin/clang
+          cxx-compiler: /opt/homebrew/opt/llvm/bin/clang++
 
       - name: Run tests
         run: |

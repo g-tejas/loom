@@ -13,6 +13,7 @@ enum class Operation : uint8_t {
     Added = 1,
     Removed = 2,
     Modified = 3,
+    File = 4,
 };
 
 /**
@@ -27,6 +28,24 @@ public:
 
     Loom(const Loom &) = delete;
     Loom &operator=(const Loom &) = delete;
+
+    auto subscribe_file(char *path, Fiber *fiber) -> int {
+        int fd = open(path, O_EVTONLY);
+        if (fd == -1) {
+            return -1;
+        }
+        m_subs_by_fd[fd].push_back(fiber);
+        m_subcount++;
+
+        auto it = std::find(fiber->m_fds.begin(), fiber->m_fds.end(), fd);
+        if (it != fiber->m_fds.end()) {
+            return 1;
+        }
+        fiber->m_fds.push_back(fd);
+
+        handle_sock_op(fd, Operation::File);
+        return 0;
+    }
 
     auto subscribe(int fd, Fiber *fiber) -> int {
         // Add to the looms

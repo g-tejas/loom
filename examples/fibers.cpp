@@ -6,7 +6,7 @@ using namespace std;
 
 struct Worker : loom::Fiber {
     explicit Worker(size_t stack_size) : loom::Fiber(stack_size) {}
-    void run() {
+    void run() override {
         int thing = 0;
         for (int i = 0; i < 100; ++i) {
             thing = (thing * 7 + i) / 8;

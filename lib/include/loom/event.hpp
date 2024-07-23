@@ -10,6 +10,7 @@ struct Event {
         SocketWriteable = 2,
         SocketError = 3,
         SocketHangup = 4,
+        FileModified = 5,
         Timer = 5,
     };
     Type type;

@@ -27,7 +27,7 @@ jobs:
           generator: Ninja
           c-compiler: clang
           cxx-compiler: clang++
-          options: -DBUILD_BINARY=OFF -DBUILD_TESTS=ON
+          options: -G Ninja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_COMPILER=/opt/homebrew/opt/llvm/bin/clang -DCMAKE_CXX_COMPILER=/opt/homebrew/opt/llvm/bin/clang++
 
       - name: Run tests
         run: |

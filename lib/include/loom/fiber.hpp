@@ -27,8 +27,6 @@ using StackContext = ctx::stack_context;
 /// A stack-ful coroutine class. This is a base class and user needs to implement it
 /// and implement the virtual `run()` method.
 class Fiber {
-    friend class Loom;
-
 public:
     explicit Fiber(size_t _stack_size) {
         StackAllocator allocator(_stack_size);
@@ -77,7 +75,6 @@ public:
         m_return_context = ctx::detail::jump_fcontext(m_thread_context, (void *)this);
     }
 
-protected:
     //! List of fds that this fiber is interested in.
     std::vector<int> m_fds;
 

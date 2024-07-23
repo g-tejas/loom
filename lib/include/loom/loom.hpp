@@ -15,135 +15,109 @@ enum class Operation : uint8_t {
     Modified = 3,
 };
 
-//! The heart and soul of the loom library. Handles fiber dispatch
+/**
+ * The heart and soul of the Loom library.
+ * @tparam Impl Platform-specific implementation: `kqueue`, `epoll`, `io_uring`
+ */
+template <typename Impl>
 class Loom {
 public:
-    Loom();
-
-    ~Loom();
+    Loom() = default;
+    ~Loom() = default;
 
     Loom(const Loom &) = delete;
     Loom &operator=(const Loom &) = delete;
 
-    auto subscribe(int fd, Fiber *fiber) -> int;
+    auto subscribe(int fd, Fiber *fiber) -> int {
+        // Add to the looms
+        m_subs_by_fd[fd].push_back(fiber);
+        m_subcount++;
 
-    void remove_socket(int fd);
-    void remove_fiber(Fiber *fiber);
+        // Add to the fiber's list as well
+        auto it = std::find(fiber->m_fds.begin(), fiber->m_fds.end(), fd);
+        if (it != fiber->m_fds.end()) {
+            return 1;
+        }
+        fiber->m_fds.push_back(fd);
+
+        // Tell kernel to start monitoring this fd
+        handle_sock_op(fd, Operation::Added);
+        return 0;
+    }
+
+    void remove_socket(int fd) {
+        for (const auto fiber : m_subs_by_fd[fd]) {
+            auto it = std::find(fiber->m_fds.begin(), fiber->m_fds.end(), fd);
+            if (it != fiber->m_fds.end()) {
+                fiber->m_fds.erase(it);
+                m_subcount--;
+            }
+        }
+
+        m_subs_by_fd.erase(fd);
+
+        // Tell kernel to stop monitoring this fd
+        handle_sock_op(fd, Operation::Removed);
+    }
+
+    void remove_fiber(Fiber *fiber) {
+        for (int fd : fiber->m_fds) {
+            auto it = std::find(m_subs_by_fd[fd].begin(), m_subs_by_fd[fd].end(), fiber);
+            if (it != m_subs_by_fd[fd].end()) {
+                m_subs_by_fd[fd].erase(it);
+                m_subcount--;
+            }
+
+            // if the fd hits zero, remove the socket
+            if (m_subs_by_fd[fd].empty()) {
+                handle_sock_op(fd, Operation::Removed);
+                m_subs_by_fd.erase(fd);
+            }
+        }
+    }
 
     /**
      * @brief Returns true if any subscriptions are active
      * @return True if any subscriptions are active, false otherwise
      */
-    [[nodiscard]] auto active() const -> bool;
+    [[nodiscard]] auto active() const -> bool { return true; }
 
-    //! Notify the subscribers of this event about the event. Will cause a context switch.
-    void notify(Event event);
-
-    //! Runs the event loop for given time or until there are no subscriptions left,
-    //! whichever comes first. Look at TigerBeetle's implementation
-    auto run_for_ns(uint64_t ns) const -> bool;
+    virtual void set_timer(int fd, int timer_period, Fiber *fiber) {
+        static_cast<Impl *>(this)->set_timer(fd, timer_period, fiber);
+    }
 
 protected:
+    //! Notify the subscribers of this event about the event. Will cause a context switch.
+    void notify(Event event) {
+        std::vector<Fiber *> cleanup;
+        for (const auto fiber : m_subs_by_fd[event.fd]) {
+            if (!fiber->resume(&event)) {
+                cleanup.push_back(fiber);
+            }
+        }
+
+        for (const auto fiber : cleanup) {
+            this->remove_fiber(fiber);
+        }
+
+        if (event.type == Event::Type::SocketHangup ||
+            event.type == Event::Type::SocketError) {
+            this->remove_socket(event.fd);
+        }
+    }
+
+    //! Tells the kernel queue of choice to start / stop monitoring the file descriptor
+    virtual void handle_sock_op(int fd, Operation op) {
+        static_cast<Impl *>(this)->handle_sock_op(fd, op);
+    }
+
     struct Subscription {
         int fd;
         Fiber *thread;
     };
 
     std::unordered_map<int, std::vector<Fiber *>> m_subs_by_fd;
-    int m_subcount{};
-
-    //! Tells the kernel queue of choice to start / stop monitoring the file descriptor
-    void handle_sock_op(int fd, Operation op);
-
-    bool epoch();
-
-    void set_timer(int id, int timer_period);
-
-private:
-#ifdef LOOM_BACKEND_KQUEUE
-    int m_kqueue_fd;
-    std::array<struct kevent, 16> m_event{};
-    std::vector<struct kevent> m_changes;
-    //! How long to block waiting for events. `nullptr` means block indefinitely
-    timespec *m_timeout;
-#endif
+    int m_subcount = 0;
 };
-
-auto Loom::subscribe(int fd, Fiber *fiber) -> int {
-    // Add to the looms
-    m_subs_by_fd[fd].push_back(fiber);
-    m_subcount++;
-
-    // Add to the fiber's list as well
-    auto it = std::find(fiber->m_fds.begin(), fiber->m_fds.end(), fd);
-    if (it != fiber->m_fds.end()) {
-        return 1;
-    }
-    fiber->m_fds.push_back(fd);
-
-    // Tell kernel to start monitoring this fd
-    handle_sock_op(fd, Operation::Added);
-}
-
-void Loom::remove_socket(int fd) {
-    for (const auto fiber : m_subs_by_fd[fd]) {
-        auto it = std::find(fiber->m_fds.begin(), fiber->m_fds.end(), fd);
-        if (it != fiber->m_fds.end()) {
-            fiber->m_fds.erase(it);
-            m_subcount--;
-        }
-    }
-
-    m_subs_by_fd.erase(fd);
-
-    // Tell kernel to stop monitoring this fd
-    handle_sock_op(fd, Operation::Removed);
-}
-
-void Loom::remove_fiber(Fiber *fiber) {
-    for (int fd : fiber->m_fds) {
-        auto it = std::find(m_subs_by_fd[fd].begin(), m_subs_by_fd[fd].end(), fiber);
-        if (it != m_subs_by_fd[fd].end()) {
-            m_subs_by_fd[fd].erase(it);
-            m_subcount--;
-        }
-
-        // if the fd hits zero, remove the socket
-        if (m_subs_by_fd[fd].empty()) {
-            handle_sock_op(fd, Operation::Removed);
-            m_subs_by_fd.erase(fd);
-        }
-    }
-}
-
-auto Loom::active() const -> bool { return m_subcount > 0; }
-
-void Loom::notify(Event event) {
-    std::vector<Fiber *> cleanup;
-    for (const auto fiber : m_subs_by_fd[event.fd]) {
-        if (!fiber->resume(&event)) {
-            cleanup.push_back(fiber);
-        }
-    }
-
-    for (const auto fiber : cleanup) {
-        this->remove_fiber(fiber);
-    }
-
-    if (event.type == Event::Type::SocketHangup ||
-        event.type == Event::Type::SocketError) {
-        this->remove_socket(event.fd);
-    }
-}
-
-auto Loom::run_for_ns(uint64_t ns) const -> bool { return true; }
-
-#ifdef LOOM_BACKEND_KQUEUE
-#include "loom/backends/kqueue.hpp"
-#endif
-
-#ifdef LOOM_BACKEND_EPOLL
-#include "loom/backends/epoll.hpp"
-#endif
 
 } // namespace loom

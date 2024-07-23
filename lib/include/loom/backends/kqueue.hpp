@@ -123,12 +123,14 @@ public:
     int m_kq_fd;
     std::array<struct kevent, 16> m_changes;
     int m_nchanges;
-    struct timespec *m_timeout = nullptr;
+    struct timespec m_timeout {};
 
 public:
     Kqueue() {
         m_kq_fd = kqueue();
         m_nchanges = 0;
+        m_timeout.tv_sec = 0;
+        m_timeout.tv_nsec = 500000000;
         FLUX_ASSERT(m_kq_fd != -1, "Failed to create kqueue");
     }
 
@@ -152,7 +154,7 @@ public:
         // `m_timeout` must be non-empty if we want to also monitor SPSC queues for
         // example `m_timeout` == 0 degrades the performance to a regular poll event loop
         int n = kevent(m_kq_fd, m_changes.data(), m_nchanges, events.data(),
-                       events.size(), m_timeout);
+                       events.size(), &m_timeout);
         m_nchanges = 0;
 
         // `kevent` can be interrupted by signals, so we check `errno` global variable.
@@ -168,6 +170,7 @@ public:
                 continue;
             }
             if (events[i].filter == EVFILT_READ) {
+                // Not just socket reads but reads for files too
                 this->notify(Event{.type = Event::Type::SocketRead,
                                    .fd = static_cast<int>(events[i].ident)});
             } else if (events[i].filter == EVFILT_WRITE) {
@@ -183,6 +186,11 @@ public:
                 printf("Unknown event\n");
             }
         }
+
+        // Reset the timeout. In case of a signal interruption the values might change
+        m_timeout.tv_sec = 0;
+        m_timeout.tv_nsec = 500000000;
+
         return true;
     }
 
@@ -213,7 +221,6 @@ public:
 
         if (m_nchanges >= 10) [[unlikely]] {
             // `changelist` is full, need to flush the changes to the kernel.
-            printf("This shouldnt print\n");
             int n = kevent(m_kq_fd, m_changes.data(), m_nchanges, nullptr, 0, nullptr);
             // abstract into a "flush" command
             FLUX_ASSERT(n >= 0, "Failed to flush changes to the kernel");
@@ -239,6 +246,8 @@ public:
                    NOTE_DELETE | NOTE_WRITE | NOTE_EXTEND | NOTE_ATTRIB | NOTE_LINK |
                        NOTE_RENAME | NOTE_REVOKE,
                    0, nullptr);
+            EV_SET(&m_changes[m_nchanges++], fd, EVFILT_READ, EV_ADD | EV_CLEAR, 0, 0,
+                   nullptr);
             break;
         case Operation::Modified: [[fallthrough]];
         case Operation::NIL: break;

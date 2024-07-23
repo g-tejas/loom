@@ -81,16 +81,9 @@ move the stuff into the overflow queue.
 
 ## Timers
 
-- The various IO readiness facilities all have different ways to schedule timers. `flux` aims to generalise this. There
+- The various IO readiness facilities all have different ways to schedule timers. `loom` aims to generalise this. There
   are two options:
     1. [Implement timers as a special lightweight fiber](https://photonlibos.github.io/docs/api/thread#timer) to
        periodically fire notifications. Good if we want to call functions on timer fires. Function signature can look
        like `Timer(uint64_t timeout, std::function<void*(void*)> on_timer, bool is_repeating = true, uint64_t stack_size = 1024)`
     2. Use the kernel facilities to register timers.
-
-## Singleton Reactor
-
-- As mentioned earlier, `flux` is a M:1 model. This calls for
-  a [singleton pattern](https://photonlibos.github.io/docs/api/env), to ensure that the user doesn't accidentally
-  create > 1 reactor.
-- `void flux::init(flux::EventEngine event_engine = flux::EventEngine::AUTO);`

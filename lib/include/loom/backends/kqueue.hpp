@@ -131,7 +131,7 @@ public:
         m_nchanges = 0;
         m_timeout.tv_sec = 0;
         m_timeout.tv_nsec = 500000000;
-        FLUX_ASSERT(m_kq_fd != -1, "Failed to create kqueue");
+        LOOM_ASSERT(m_kq_fd != -1, "Failed to create kqueue");
     }
 
     ~Kqueue() {
@@ -199,7 +199,7 @@ public:
         EV_SET(&ev, fd, EVFILT_TIMER, EV_ADD | EV_ENABLE, NOTE_SECONDS, timer_period,
                nullptr);
         int n = kevent(m_kq_fd, &ev, 1, nullptr, 0, nullptr);
-        FLUX_ASSERT(n >= 0, "Failed to set timer");
+        LOOM_ASSERT(n >= 0, "Failed to set timer");
 
         // Need to subscribe
         m_subs_by_fd[fd].push_back(fiber);
@@ -216,14 +216,14 @@ public:
 
     void handle_sock_op(int fd, loom::Operation op) override {
 #ifndef NDEBUG
-        FLUX_ASSERT(m_kq_fd >= 0, "Kqueue file descriptor is invalid");
+        LOOM_ASSERT(m_kq_fd >= 0, "Kqueue file descriptor is invalid");
 #endif
 
         if (m_nchanges >= 10) [[unlikely]] {
             // `changelist` is full, need to flush the changes to the kernel.
             int n = kevent(m_kq_fd, m_changes.data(), m_nchanges, nullptr, 0, nullptr);
             // abstract into a "flush" command
-            FLUX_ASSERT(n >= 0, "Failed to flush changes to the kernel");
+            LOOM_ASSERT(n >= 0, "Failed to flush changes to the kernel");
             m_nchanges = 0;
         }
         // EV_ADD attaches descriptor to kq

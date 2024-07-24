@@ -19,10 +19,7 @@ and the underlying implementation of the asynchronous interface.
 
 ## Todo
 
-- Rename to `loom` ? More appropriate than `flux` since this is a fiber library.
-  Need to decide whether we want a callback interface, or what.
-  Normally, the callbacks are function pointers casted to integers, and stored in the user_data field of the SQE.
-  Both kqueue and epoll have this. Once the IO is complete, the callback is invoked.
+Both kqueue and epoll have this. Once the IO is complete, the callback is invoked.
 
 https://webflow.com/made-in-webflow/website/Apple-Style-Grid Can make this as the front page LOL
 

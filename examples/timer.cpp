@@ -1,5 +1,6 @@
-#include "loom/backends/kqueue.hpp"
 #include <iostream>
+
+#include "loom/all.hpp"
 
 class Worker : public loom::Fiber {
 public:

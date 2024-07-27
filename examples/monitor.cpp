@@ -1,6 +1,6 @@
-#include "loom/backends/kqueue.hpp"
-#include "loom/fiber.hpp"
-#include "loom/utils.hpp"
+#include <iostream>
+
+#include "loom/all.hpp"
 
 class Monitor : public loom::Fiber {
 public:

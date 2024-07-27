@@ -1,4 +1,4 @@
-add_compile_definitions(USE_KQUEUE)
+message(STATUS "${CMAKE_PROJECT_NAME}: Building examples")
 
 add_executable(fibers fibers.cpp)
 target_link_libraries(fibers PRIVATE loom)

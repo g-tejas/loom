@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.29)
 project(eventloop-tests)
 Include(FetchContent)
 
+message(STATUS "${CMAKE_PROJECT_NAME}: Building tests")
+
 # Catch2 for testing
 set(BUILD_TESTING OFF)
 set(CATCH_INSTALL_DOCS OFF)

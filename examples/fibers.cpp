@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "loom/fiber.hpp"
+#include "loom/all.hpp"
 
 using namespace std;
 

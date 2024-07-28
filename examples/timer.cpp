@@ -19,7 +19,7 @@ public:
     }
 };
 
-int main() {
+$LOOM_MAIN(int argc, char *argv[]) {
     Worker worker(4096);
     worker.start();
 

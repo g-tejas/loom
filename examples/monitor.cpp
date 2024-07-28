@@ -14,7 +14,7 @@ public:
     }
 };
 
-int main(int argc, char *argv[]) {
+$LOOM_MAIN(int argc, char *argv[]) {
     LOOM_ASSERT(argc == 2, "Usage: monitor <file>");
     Monitor monitor(4096);
     monitor.start();

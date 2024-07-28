@@ -5,6 +5,7 @@ backends: `kqueue`,`epoll`, `IOCP`
 
 ## `kqueue` (Darwin)
 
+[Bible](https://people.freebsd.org/~jlemon/papers/kqueue.pdf)
 `KV_CLEAR`: Prevents kq from signalling the same event over and over again. If a socket wasn't read fully,
 then kq will signal us again, so instead of having to process the same signal multiple times, we make sure that we
 fully consume the data.
@@ -25,7 +26,13 @@ struct kevent {
 };
 ```
 
+https://stackoverflow.com/questions/37731435/what-exactly-is-kqueues-ev-receipt-for
+EV_RECEIPT
+
 ## `io_uring` (Linux)
+
+https://github.com/axboe/liburing/issues/536
+https://github.com/axboe/liburing/issues/189
 
 ## `epoll` (Older Linux distributions)
 

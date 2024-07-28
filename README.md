@@ -16,6 +16,7 @@ and the underlying implementation of the asynchronous interface.
 - Multiple backends: `kqueue`, `epoll`, `io_uring` (all of these seem to be edge triggered)
 - Supports unix domain sockets
 - Support for pinning event loop to hardware threads.
+- `glibc` system call hooks
 
 ## Usage
 

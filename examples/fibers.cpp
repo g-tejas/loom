@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "loom/all.hpp"
+#include <dlfcn.h>
 
 using namespace std;
 
@@ -16,7 +17,7 @@ struct Worker : loom::Fiber {
     }
 };
 
-int main() {
+$LOOM_MAIN(int argc, char *argv[]) {
     Worker worker(4096);
     worker.start();
     loom::Event fake{loom::Event::Type::NA, 0};
@@ -24,4 +25,5 @@ int main() {
     while (worker.resume(&fake)) {
         cout << "Resuming worker" << endl;
     }
+    return 0;
 }

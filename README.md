@@ -16,12 +16,23 @@ and the underlying implementation of the asynchronous interface.
 - Multiple backends: `kqueue`, `epoll`, `io_uring` (all of these seem to be edge triggered)
 - Supports unix domain sockets
 - Support for pinning event loop to hardware threads.
+- `glibc` system call hooks
 
-## Todo
+## Usage
 
-Both kqueue and epoll have this. Once the IO is complete, the callback is invoked.
+Loom requires that you hook your main method (e.g the same watch Catch2 does) in order to intercept system calls before
+`glibc` functions are invoked. This has various purposes, mainly for proper scheduling behaviour and telemetry. For
+example, we don't want a `sleep` in the fiber thread to block the entire thread. Note that all macros in `loom` start
+with `$`.
 
-https://webflow.com/made-in-webflow/website/Apple-Style-Grid Can make this as the front page LOL
+```cpp
+#include <loom/all.hpp>
+
+$main(int argc, char* argv[]) {
+    // do stuff
+    return 0;
+}
+```
 
 ## Backends
 

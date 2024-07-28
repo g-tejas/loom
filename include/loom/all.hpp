@@ -4,5 +4,6 @@
 #include <loom/event.hpp>
 #include <loom/fiber.hpp>
 #include <loom/fifo.hpp>
+#include <loom/hooks.hpp>
 #include <loom/loom.hpp>
 #include <loom/utils.hpp>

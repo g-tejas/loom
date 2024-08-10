@@ -33,6 +33,7 @@ EV_RECEIPT
 
 https://github.com/axboe/liburing/issues/536
 https://github.com/axboe/liburing/issues/189
+https://blog.cloudflare.com/missing-manuals-io_uring-worker-pool
 
 ## `epoll` (Older Linux distributions)
 

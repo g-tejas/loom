@@ -8,7 +8,9 @@
 #include <iterator>
 #include <sstream>
 #include <string>
+#ifdef __APPLE__
 #include <sys/event.h>
+#endif
 
 template <>
 struct std::formatter<struct kevent> {
@@ -115,9 +117,8 @@ private:
         {NOTE_CHILD, "NOTE_CHILD"}};
 };
 
-namespace loom {
 #ifdef __APPLE__
-
+namespace loom {
 class Kqueue : public Loom<Kqueue> {
 public:
     int m_kq_fd;

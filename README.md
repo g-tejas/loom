@@ -24,7 +24,8 @@ Loom requires that you hook your main method (e.g the same watch Catch2 does) in
 `glibc` functions are invoked. This has various purposes, mainly for proper scheduling behaviour and telemetry. For
 example, we don't want a `sleep` in the fiber thread to block the entire thread.
 
-> [!info] Note that all macros in `loom` start with `$`.
+> [!NOTE]
+> Note that all macros in `loom` start with `$`.
 
 ```cpp
 #include <loom/all.hpp>

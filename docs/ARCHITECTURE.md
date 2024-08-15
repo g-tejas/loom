@@ -46,6 +46,7 @@ of bytes only.
   any task blocks.
     - Furthermore, once a task has started, we cannot pre-empt tasks as that would essentially become
       threading, and a whole suite of problems.
+- Pre-empting opens up a whole can of race conditions we must have to deal with.
 
 https://agraphicsguynotes.com/posts/fiber_in_cpp_understanding_the_basics/
 

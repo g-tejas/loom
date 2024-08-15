@@ -10,10 +10,10 @@ and the underlying implementation of the asynchronous interface.
 
 ## Features
 
-- No runtime allocations
+- (Eventually) No runtime allocations
 - Intrusive pointers
 - Fast context switches (powered by Boost.Context)
-- Multiple backends: `kqueue`, `epoll`, `io_uring` (all of these seem to be edge triggered)
+- Cross platform: `kqueue`, `epoll`
 - Supports unix domain sockets
 - Support for pinning event loop to hardware threads.
 - `glibc` system call hooks
@@ -22,23 +22,18 @@ and the underlying implementation of the asynchronous interface.
 
 Loom requires that you hook your main method (e.g the same watch Catch2 does) in order to intercept system calls before
 `glibc` functions are invoked. This has various purposes, mainly for proper scheduling behaviour and telemetry. For
-example, we don't want a `sleep` in the fiber thread to block the entire thread. Note that all macros in `loom` start
-with `$`.
+example, we don't want a `sleep` in the fiber thread to block the entire thread.
+
+> [!info] Note that all macros in `loom` start with `$`.
 
 ```cpp
 #include <loom/all.hpp>
 
-$main(int argc, char* argv[]) {
+$LOOM_MAIN(int argc, char* argv[]) {
     // do stuff
     return 0;
 }
 ```
-
-## Backends
-
-1. Linux: `io_uring`, `epoll` (fallback incase kernel does not support `io_uring`)
-2. MacOS: `kqueue`
-   TODO: No support for Windows (`IOCP`) yet.
 
 ## Resources
 

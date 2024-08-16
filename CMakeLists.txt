@@ -12,6 +12,13 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-undefined,dynamic_loo
 option(BUILD_TESTS "Build tests" ON)
 option(BUILD_EXAMPLES "Build examples" ON)
 
+# {fmt}
+FetchContent_Declare(
+        fmt
+        GIT_REPOSITORY https://github.com/fmtlib/fmt
+        GIT_TAG 11.0.2) # 10.2.1
+FetchContent_MakeAvailable(fmt)
+
 # Boost
 find_package(Boost COMPONENTS context REQUIRED)
 message(STATUS "Boost include dir: ${Boost_INCLUDE_DIRS}")
@@ -34,7 +41,7 @@ FetchContent_MakeAvailable(tracy)
 message(STATUS "${PROJECT_NAME} Building library")
 add_library(${PROJECT_NAME} INTERFACE)
 target_include_directories(${PROJECT_NAME} INTERFACE include ${Boost_INCLUDE_DIRS})
-target_link_libraries(${PROJECT_NAME} INTERFACE dl ${Boost_LIBRARIES} Tracy::TracyClient)
+target_link_libraries(${PROJECT_NAME} INTERFACE dl ${Boost_LIBRARIES} Tracy::TracyClient fmt::fmt)
 
 if (BUILD_EXAMPLES)
     add_subdirectory(examples)

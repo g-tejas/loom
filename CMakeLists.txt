@@ -1,52 +1,49 @@
 cmake_minimum_required(VERSION 3.29)
 project(loom)
-include(FetchContent)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
+# Require dynamic_lookup for hooking system calls
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-undefined,dynamic_lookup")
 
-option(BUILD_TESTS "Build tests" ON)
-option(BUILD_EXAMPLES "Build examples" ON)
+option(LOOM_BUILD_TESTS "Build loom tests" ON)
+option(LOOM_BUILD_EXAMPLES "Build loom examples" ON)
+option(LOOM_BUILD_BENCHMARKS "Build loom benchmarks" ON)
 
-# {fmt}
-FetchContent_Declare(
-        fmt
-        GIT_REPOSITORY https://github.com/fmtlib/fmt
-        GIT_TAG 11.0.2) # 10.2.1
-FetchContent_MakeAvailable(fmt)
+add_subdirectory(third_party)
 
-# Boost
-find_package(Boost COMPONENTS context REQUIRED)
-message(STATUS "Boost include dir: ${Boost_INCLUDE_DIRS}")
+file(GLOB LOOM_SRC
+		io/engine.cpp
+        fiber/fiber.cpp)
 
-# Tracy
-option(TRACY_ENABLE "" ON)
-option(TRACY_FIBERS "" ON) # pdf page 38
+if (APPLE)
+	list(APPEND LOOM_SRC io/kqueue.cpp)
+elseif (UNIX)
+	list(APPEND LOOM_SRC io/epoll.cpp)
+endif ()
 
-FetchContent_Declare(
-        tracy
-        GIT_REPOSITORY https://github.com/wolfpld/tracy.git
-        GIT_TAG master
-        GIT_SHALLOW TRUE
-        GIT_PROGRESS TRUE
-)
-FetchContent_MakeAvailable(tracy)
-
-
-# add the library
 message(STATUS "${PROJECT_NAME} Building library")
-add_library(${PROJECT_NAME} INTERFACE)
-target_include_directories(${PROJECT_NAME} INTERFACE include ${Boost_INCLUDE_DIRS})
-target_link_libraries(${PROJECT_NAME} INTERFACE dl ${Boost_LIBRARIES} Tracy::TracyClient fmt::fmt)
+add_library(${PROJECT_NAME} SHARED ${LOOM_SRC})
+target_include_directories(${PROJECT_NAME} PUBLIC include)
+target_link_libraries(${PROJECT_NAME} PUBLIC dl loom_third_party)
 
-if (BUILD_EXAMPLES)
+if (LOOM_BUILD_EXAMPLES)
+    message(STATUS "${CMAKE_PROJECT_NAME}: Building examples")
     add_subdirectory(examples)
 endif ()
 
-if (BUILD_TESTS)
-    add_subdirectory(tests)
+if (LOOM_BUILD_TESTS)
+    message(STATUS "${CMAKE_PROJECT_NAME}: Building tests")
+    add_subdirectory(common/test)
+    add_subdirectory(fiber/test)
 endif ()
+
+if (LOOM_BUILD_BENCHMARKS)
+	message(STATUS "${CMAKE_PROJECT_NAME}: Building benchmarks")
+	set(BENCHMARK_DOWNLOAD_DEPENDENCIES ON)
+	add_subdirectory(third_party/benchmark)
+	add_subdirectory(benchmarks)
+endif()

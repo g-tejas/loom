@@ -1,5 +1,7 @@
 # loom
 
+Loom is a high performance, cross platform fiber event loop library for C++20.
+
 This abstraction serves the main purpose: To not think about IO readiness events, but just IO completion.
 What do I mean by this? The `io_uring` and `epoll` interface are quite different. `io_uring` takes the SQE,
 together with a callback, and the kernel itself will perform the `read` for e.g. `epoll` on the other hand,
@@ -10,13 +12,12 @@ and the underlying implementation of the asynchronous interface.
 
 ## Features
 
-- (Eventually) No runtime allocations
-- Intrusive pointers
-- Fast context switches (powered by Boost.Context)
 - Cross platform: `kqueue`, `epoll`
-- Supports unix domain sockets
-- Support for pinning event loop to hardware threads.
 - `glibc` system call hooks
+- Fast context switches (powered by [Boost.Context](https://github.com/boostorg/context))
+- (Eventually) No runtime allocations- Intrusive pointers
+- Supports unix domain sockets
+- Support for CPU affinity and pinning threads to cores
 
 ## Usage
 
@@ -28,11 +29,12 @@ example, we don't want a `sleep` in the fiber thread to block the entire thread.
 > Note that all macros in `loom` start with `$`.
 
 ```cpp
-#include <loom/all.hpp>
+#include <loom/loom.h>
 
 $LOOM_MAIN(int argc, char* argv[]) {
-    // do stuff
-    return 0;
+	int ret = loom::init(loom::EVENT_ENGINE_KQUEUE);
+	LOOM_ASSERT(ret == 0, "Failed to initialize loom");
+	defer(loom::fini());
 }
 ```
 

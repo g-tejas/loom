@@ -97,12 +97,10 @@ auto init(const uint32_t event_engine) -> int {
     fmt::print(fmt::emphasis::bold | fg(fmt::color::light_green), "loom::init()\n");
     switch (event_engine) {
 #ifdef __linux__
-    case EVENT_ENGINE_EPOLL: return new_epoll_engine();
+    case EVENT_ENGINE_EPOLL: return _engine_init(&new_epoll_engine);
 #endif
 #ifdef __APPLE__
-    case EVENT_ENGINE_KQUEUE: {
-        return _engine_init(&new_kqueue_engine);
-    }
+    case EVENT_ENGINE_KQUEUE: return _engine_init(&new_kqueue_engine);
 #endif
     default: return -1;
     }

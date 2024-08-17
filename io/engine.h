@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <loom/fiber/fiber.h>
+#include <optional>
 
 namespace loom {
 //! The operations that can be performed on a file descriptor
@@ -72,7 +73,7 @@ $LOOM_DECLARE_ENGINE(epoll);
 $LOOM_DECLARE_ENGINE(kqueue);
 
 // Singleton methods
-int init(const uint32_t event_engine = EVENT_ENGINE_DEFAULT);
+int init(uint32_t event_engine = EVENT_ENGINE_DEFAULT);
 std::optional<Engine *> instance() noexcept;
 int fini() noexcept;
 

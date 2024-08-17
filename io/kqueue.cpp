@@ -23,7 +23,7 @@ struct fmt::formatter<struct kevent> {
     }
 
 private:
-    [[nodiscard]] std::string fflag_to_string(uint32_t fflags) const {
+    static [[nodiscard]] std::string fflag_to_string(uint32_t fflags) {
         std::ostringstream ret;
         bool first = true;
 
@@ -40,7 +40,7 @@ private:
         return ret.str();
     }
 
-    std::string_view filter_to_string(int16_t filter) const {
+    static std::string_view filter_to_string(int16_t filter) {
         auto it = filter_names.find(filter);
         if (it != filter_names.end()) {
             return it->second;
@@ -117,7 +117,7 @@ private:
 
 namespace loom {
 class KqueueEngine : public Engine {
-public:
+private:
     int m_kq_fd;
     std::array<struct kevent, 16> m_changes;
     int m_nchanges;
@@ -132,7 +132,7 @@ public:
         LOOM_ASSERT(m_kq_fd != -1, "Failed to create kqueue");
     }
 
-    ~KqueueEngine() {
+    ~KqueueEngine() override {
         if (m_kq_fd >= 0) {
             close(m_kq_fd);
         }
@@ -212,7 +212,7 @@ public:
         // No need to tell kernel to start monitoring because it already is (for timer)
     }
 
-    void handle_sock_op(int fd, loom::Operation op) override {
+    void handle_sock_op(int fd, Operation op) override {
 #ifndef NDEBUG
         LOOM_ASSERT(m_kq_fd >= 0, "Kqueue file descriptor is invalid");
 #endif

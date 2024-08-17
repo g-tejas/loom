@@ -1,29 +1,26 @@
 #pragma once
 
-#include <format>
 #include <source_location>
+#include <sstream>
 #include <type_traits>
 #include <utility>
 
-#define LOOM_ERROR 1
-
-template <typename Fx>
-struct defer_t {
-    Fx _fx;
-
-    explicit defer_t(Fx &&_arg_fx) noexcept(::std::is_nothrow_move_constructible_v<Fx>)
-        : _fx(::std::move(_arg_fx)) {}
-
-    ~defer_t() noexcept(::std::is_nothrow_invocable_v<Fx>) { _fx(); }
+template <typename F>
+struct privDefer {
+    F f;
+    privDefer(F f) : f(f) {}
+    ~privDefer() { f(); }
 };
 
-template <typename Fx>
-defer_t(Fx _fx) -> defer_t<::std::decay_t<Fx>>;
+template <typename F>
+privDefer<F> defer_func(F f) {
+    return privDefer<F>(f);
+}
 
-#define DEFER_TOK_PASTE(X, Y) X##Y
-#define defer __defer_t DEFER_TOK_PASTE(__scoped_defer_obj, __COUNTER__) = [&]()
-
-#include <sstream>
+#define DEFER_1(x, y) x##y
+#define DEFER_2(x, y) DEFER_1(x, y)
+#define DEFER_3(x) DEFER_2(x, __COUNTER__)
+#define defer(code) auto DEFER_3(_defer_) = defer_func([&]() { code; })
 
 #define LOOM_ASSERT(cond_expr, description)                                              \
     do {                                                                                 \

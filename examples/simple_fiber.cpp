@@ -1,7 +1,6 @@
 #include <iostream>
 
-#include "loom/all.hpp"
-#include <dlfcn.h>
+#include <loom/loom.h>
 
 using namespace std;
 

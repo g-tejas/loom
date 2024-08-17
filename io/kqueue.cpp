@@ -1,23 +1,21 @@
 #pragma once
 
-#include "loom/loom.hpp"
-#include "loom/utils.hpp"
+#include "loom/common/utils.h"
+#include "loom/io/engine.h"
 
-#include <format>
-#include <iostream>
-#include <iterator>
+#include <fmt/base.h>
+#include <fmt/format.h>
 #include <sstream>
 #include <string>
 #ifdef __APPLE__
 #include <sys/event.h>
-#endif
 
 template <>
-struct std::formatter<struct kevent> {
+struct fmt::formatter<struct kevent> {
     constexpr auto parse(auto &ctx) { return ctx.begin(); }
 
     auto format(const struct kevent &kev, auto &ctx) const {
-        return std::format_to(ctx.out(),
+        return fmt::format_to(ctx.out(),
                               "kevent{{ ident: {}, filter: {}, flags: {:#x}, fflags: "
                               "{}, data: {}, udata: {} }}",
                               kev.ident, filter_to_string(kev.filter), kev.flags,
@@ -25,7 +23,7 @@ struct std::formatter<struct kevent> {
     }
 
 private:
-    std::string fflag_to_string(uint32_t fflags) const {
+    [[nodiscard]] std::string fflag_to_string(uint32_t fflags) const {
         std::ostringstream ret;
         bool first = true;
 
@@ -117,9 +115,8 @@ private:
         {NOTE_CHILD, "NOTE_CHILD"}};
 };
 
-#ifdef __APPLE__
 namespace loom {
-class Kqueue : public Loom<Kqueue> {
+class KqueueEngine : public Engine {
 public:
     int m_kq_fd;
     std::array<struct kevent, 16> m_changes;
@@ -127,7 +124,7 @@ public:
     struct timespec m_timeout {};
 
 public:
-    Kqueue() {
+    KqueueEngine() {
         m_kq_fd = kqueue();
         m_nchanges = 0;
         m_timeout.tv_sec = 0;
@@ -135,7 +132,7 @@ public:
         LOOM_ASSERT(m_kq_fd != -1, "Failed to create kqueue");
     }
 
-    ~Kqueue() {
+    ~KqueueEngine() {
         if (m_kq_fd >= 0) {
             close(m_kq_fd);
         }
@@ -164,7 +161,7 @@ public:
 
         for (int i = 0; i < n; ++i) {
 #ifndef NDEBUG
-            std::cout << std::format("{}\n", events[i]);
+            fmt::print("{}\n", events[i]);
 #endif
             if (events[i].flags & EV_ERROR) {
                 printf("Error event\n");
@@ -255,5 +252,7 @@ public:
         }
     }
 };
-#endif
+
+Engine *new_kqueue_engine() { return new KqueueEngine(); }
 } /* namespace loom */
+#endif

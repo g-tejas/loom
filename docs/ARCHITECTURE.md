@@ -1,3 +1,6 @@
+- `/include`: All the symlinks to the header. Don't touch this!
+- `/docs`: You are here
+
 # Design choices
 
 Callback vs Threaded workers?

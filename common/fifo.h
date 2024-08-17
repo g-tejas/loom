@@ -37,7 +37,6 @@ public:
     /// TODO: Utilise the trick to copy multiple queue elements in one go where you
     /// virtual map the same queue twice
     bool push(T *elem) {
-        // TODO: Replace this with the CHECK_EX macro
         if (elem == nullptr || elem->next != nullptr)
             return false;
         if (head == nullptr) {

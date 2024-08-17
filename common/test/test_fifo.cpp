@@ -1,4 +1,4 @@
-#include "loom/fifo.hpp"
+#include "loom/common/fifo.h"
 #include <catch2/catch_test_macros.hpp>
 
 struct Node {

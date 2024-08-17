@@ -1,6 +1,9 @@
 #pragma once
 
+#include <cstdio>
+#include <cstdlib>
 #include <dlfcn.h>
+#include <sys/types.h>
 
 #define $LOOM_MAIN(a, b)                                                                 \
     int __main(int, char **);                                                            \

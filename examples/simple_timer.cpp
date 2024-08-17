@@ -2,6 +2,8 @@
 
 #include "loom/all.hpp"
 
+using namespace loom;
+
 class Worker : public loom::Fiber {
 public:
     explicit Worker(size_t stack_size) : loom::Fiber(stack_size) {}
@@ -20,10 +22,12 @@ public:
 };
 
 $LOOM_MAIN(int argc, char *argv[]) {
+    std::cout << "Hello\n";
     Worker worker(4096);
     worker.start();
 
-    loom::Kqueue loom;
+    auto loom = loom::get();
+    //    loom::Kqueue loom;
     loom.set_timer(10, 1, &worker);
 
     while (loom.active()) {
